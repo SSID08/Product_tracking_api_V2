@@ -5,7 +5,7 @@ const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../tes
 const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
 
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'AppUser1';
+const org1UserId = 'AppUser3';
 const mspOrg1 = 'Org1MSP';
 
 const ccp = buildCCPOrg1();
@@ -22,6 +22,6 @@ await enrollAdmin(caClient, wallet, mspOrg1);
 
 // in a real application this would be done only when a new user was required to be added
 // and would be part of an administrative flow
-await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1','Org1');}
+await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1','Org1','Micheal Jordon');}
 
 main()
