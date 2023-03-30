@@ -10,11 +10,28 @@ const chaincodeName = 'basic';
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
 */
+const corsOptions = {
+    origin: "*",
+    optionsSuccessStatus: 200
+  };
 const process = require('process');
 const express= require('express');//import the required package
+const cors = require("cors");
 const fabricNetwork = require('./fabricNetwork')
 const router = express.Router();
 const app=express();//create an object of from the express module
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "1gb" }));
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      );
+      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+  });
 const port=2000;//set the port to host the server
 
 const orgUserId = process.argv[2];
@@ -43,8 +60,9 @@ const GetAssets= async function(req,res){
     console.log('Getting assets on the blockchain');
     const contract = await fabricNetwork.connectNetwork(orgUserId);
     let result = await contract.evaluateTransaction('GetAllAssets');
-    result=prettyJSONString(result.toString());
-    res.send(result);
+    //result=prettyJSONString(result.toString());
+    res.type('json');
+    res.json(JSON.parse(result));   
 }
 
 const InitialiseLedger = async function(req,res){
@@ -54,11 +72,11 @@ const InitialiseLedger = async function(req,res){
     res.send(result);}
 
 const CreateAsset = async function(req,res){
-    var type=req.query.type;
-    var location = req.query.location;
-    var weight = req.query.weight;
-    var temp =req.query.temp;
-    var date =req.query.date
+    var type=req.body.type;
+    var location = req.body.location;
+    var weight = req.body.weight;
+    var temp =req.body.temp;
+    var date =req.body.usebydate.toString();
     //console.log('Creating a new asset');
     const contract = await fabricNetwork.connectNetwork(orgUserId);
     const date_for_id=new Date();
@@ -108,21 +126,29 @@ const UpdateLocation=async function(req,res){
 }
 
 const UpdateTemperature= async function(req,res){
+    try{
     var id= req.query.id;
     var temperature=req.query.temp;
     const contract = await fabricNetwork.connectNetwork(orgUserId);
     let result = JSON.parse(await contract.submitTransaction('UpdateTemperature',`${id}`,`${temperature}`));
     const new_model = await TransactionModel.create(result);
-    res.send(new_model.toString());
+    res.send(new_model.toString());}
+    catch(err) {
+        res.send('Transaction not allowed');
+    }
 }
 
 const UpdateWeight = async function(req,res){
+    try{
     var id= req.query.id;
     var weight= req.query.weight;
     const contract = await fabricNetwork.connectNetwork(orgUserId);
     let result = JSON.parse(await contract.submitTransaction('UpdateWeight',`${id}`,`${weight}`));
     const new_model = await TransactionModel.create(result);
-    res.send(new_model.toString());
+    res.send(new_model.toString());}
+    catch(err) {
+        res.send('Transaction not allowed');
+    }
 
 }
 
@@ -143,12 +169,15 @@ const GetProductHistory=async function(req,res){
 }
 
 const DeleteAsset = async function(req,res){
+    try{
     var id=req.query.id;
     const contract = await fabricNetwork.connectNetwork(orgUserId);
     let result = JSON.parse(await contract.submitTransaction('DeleteAsset',`${id}`));
     const new_model = await TransactionModel.create(result);
-    res.send(new_model.toString());
-
+    res.send(new_model.toString());}
+    catch(err) {
+        res.send('Transaction not allowed');
+    }
 }
 
 const LinkExperiment = async function(req,res){
@@ -169,7 +198,7 @@ router.get('/',function(req,res){
 });
 router.get('/init',InitialiseLedger);
 router.get('/list_assets',GetAssets);
-router.get('/createproduct',CreateAsset);
+router.post('/createproduct',CreateAsset);
 router.get('/queryProduct',ReadAsset);
 router.get('/transferproduct',RequestTransfer);
 router.get('/confirmtransfer',ConfirmTransfer);
