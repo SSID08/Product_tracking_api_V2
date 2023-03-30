@@ -1,11 +1,11 @@
 const {Wallets} = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
-const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
-const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('./CAUtil.js');
+const { buildCCPOrg1, buildWallet } = require('./AppUtil.js');
 
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'End_Client_user';
+const org1UserId = 'AppUser1';
 const mspOrg1 = 'Org1MSP';
 
 const ccp = buildCCPOrg1();
@@ -22,6 +22,6 @@ await enrollAdmin(caClient, wallet, mspOrg1);
 
 // in a real application this would be done only when a new user was required to be added
 // and would be part of an administrative flow
-await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1','End%20%Client','David James');}
+await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1','Org1','David James');}
 
 main()
